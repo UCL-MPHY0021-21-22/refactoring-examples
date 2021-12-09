@@ -14,17 +14,14 @@ import random
 
 def update_boids(xs,ys,xvs,yvs):
     max_iteration = len(xs)
-    # Fly towards the middle
     fly_middle(xs,ys,xvs,yvs,max_iteration)
-    # Fly away from nearby boids
     fly_away(xs,ys,xvs,yvs,max_iteration)
-    # Try to match speed with nearby boids
     match_speed(xs,ys,xvs,yvs,max_iteration)
-    # Move according to velocities
     move(xs,ys,xvs,yvs,max_iteration)
 
 
 def fly_middle(xs,ys,xvs,yvs,max_iteration):
+    """Fly towards the middle"""
     for i in range(max_iteration):
         for j in range(max_iteration):
             xvs[i]=xvs[i]+(xs[j]-xs[i])*0.01/len(xs)
@@ -33,18 +30,21 @@ def fly_middle(xs,ys,xvs,yvs,max_iteration):
             yvs[i]=yvs[i]+(ys[j]-ys[i])*0.01/len(xs)
 
 def fly_away(xs,ys,xvs,yvs,max_iteration):
+    """Fly away from nearby boids"""
     for i in range(max_iteration):
         for j in range(max_iteration):
             if (xs[j]-xs[i])**2 + (ys[j]-ys[i])**2 < 100:
                 xvs[i]=xvs[i]+(xs[i]-xs[j])
                 yvs[i]=yvs[i]+(ys[i]-ys[j])
 def match_speed(xs,ys,xvs,yvs,max_iteration):
+    """Try to match speed with nearby boids"""
     for i in range(max_iteration):
         for j in range(max_iteration):
             if (xs[j]-xs[i])**2 + (ys[j]-ys[i])**2 < 10000:
                 xvs[i]=xvs[i]+(xvs[j]-xvs[i])*0.125/len(xs)
                 yvs[i]=yvs[i]+(yvs[j]-yvs[i])*0.125/len(xs)
 def move(xs,ys,xvs,yvs,max_iteration):
+    """Move according to velocities"""
     for i in range(max_iteration):
         xs[i]=xs[i]+xvs[i]
         ys[i]=ys[i]+yvs[i]
