@@ -10,34 +10,44 @@ from matplotlib import animation
 
 import random
 
-boids_x=[random.uniform(-450,50.0) for x in range(50)]
-boids_y=[random.uniform(300.0,600.0) for x in range(50)]
-boid_x_velocities=[random.uniform(0,10.0) for x in range(50)]
-boid_y_velocities=[random.uniform(-20.0,20.0) for x in range(50)]
-boids=(boids_x,boids_y,boid_x_velocities,boid_y_velocities)
+from typing import List
 
-def update_boids(boids):
-    xs,ys,xvs,yvs=boids
-    # Fly towards the middle
-    for i in range(len(xs)):
-        for j in range(len(xs)):
-            xvs[i]=xvs[i]+(xs[j]-xs[i])*0.01/len(xs)
-    for i in range(len(xs)):
-        for j in range(len(xs)):
-            yvs[i]=yvs[i]+(ys[j]-ys[i])*0.01/len(xs)
-    # Fly away from nearby boids
-    for i in range(len(xs)):
-        for j in range(len(xs)):
-            if (xs[j]-xs[i])**2 + (ys[j]-ys[i])**2 < 100:
-                xvs[i]=xvs[i]+(xs[i]-xs[j])
-                yvs[i]=yvs[i]+(ys[i]-ys[j])
-    # Try to match speed with nearby boids
-    for i in range(len(xs)):
-        for j in range(len(xs)):
-            if (xs[j]-xs[i])**2 + (ys[j]-ys[i])**2 < 10000:
-                xvs[i]=xvs[i]+(xvs[j]-xvs[i])*0.125/len(xs)
-                yvs[i]=yvs[i]+(yvs[j]-yvs[i])*0.125/len(xs)
-    # Move according to velocities
-    for i in range(len(xs)):
-        xs[i]=xs[i]+xvs[i]
-        ys[i]=ys[i]+yvs[i]
+class Boid:
+    def __init__(self, x_position, x_velocity, y_position, y_velocity):
+        self.position = {'x' : x_position, 'y' : y_position}
+        self.velocity = {'x' : x_velocity, 'y' : y_velocity}
+
+    def update_pos(self):
+        self.position['x'] += self.velocity['y']
+        self.position['y'] += self.velocity['y']
+
+    def update_vel(self, update:List[float]):
+        self.velocity['x'] += update[0]
+        self.velocity['y'] += update[1]
+
+def towards_middle(self:Boid, other:Boid, number_of_boids:int, scaling = 0.01):
+    """Updates the velocity of self so that it moves toward other"""
+    self.update_vel([(self.position['x']-other.position['x'])*scaling/number_of_boids, (self.position['y']-other.position['y'])*scaling/number_of_boids])
+    return 0
+
+def away_from_neighbours(self:Boid, other:Boid, number_of_boids:int, distance = 100):
+    """Updates the velocity of self so that it moves away from other if other is nearer than distance"""
+    if (other.position['x']-self.position['x'])**2 + (other.position['y']-self.position['y'])**2 < distance:
+        self.update_vel([(self.position['x']-other.position['x'])/number_of_boids, (self.position['y']-other.position['y'])/number_of_boids])
+    return 0
+
+def match_speed_of_neighbours(self:Boid, other:Boid, number_of_boids:int, distance = 10000, scaling = 0.125):
+    """Updates the velocity of self so that it is similar to other if other is nearer than distance"""
+    if (other.position['x']-self.position['x'])**2 + (other.position['y']-self.position['y'])**2 < distance:
+        self.update_vel([(other.velocity['x']-self.velocity['x'])*scaling/number_of_boids, (other.velocity['y']-self.velocity['y'])*scaling/number_of_boids])
+
+def update_boids(boids:List[Boid], number_of_boids:int):
+    for self in boids:
+        for other in boids:
+            towards_middle(self, other, number_of_boids)
+            away_from_neighbours(self, other, number_of_boids)
+            match_speed_of_neighbours(self, other, number_of_boids)
+        self.update_pos()
+
+no_boids = 50
+boids = [Boid(random.uniform(-450,50.0), random.uniform(0,10.0), random.uniform(300.0,600.0), random.uniform(-20.0,20.0)) for _ in range(no_boids)]
