@@ -42,7 +42,5 @@ critical = 0
 for i in range(len(results)):  # for all i
     if results[i] > 5:
         critical = critical + 1  # increase by 1
-if critical == 1:
-    print("criticality: 1 result above 5")
-else:
-    print("criticality:", critical, "results above 5")
+
+print("criticality:", critical, "results above 5")
