@@ -10,34 +10,54 @@ from matplotlib import animation
 
 import random
 
-boids_x=[random.uniform(-450,50.0) for x in range(50)]
-boids_y=[random.uniform(300.0,600.0) for x in range(50)]
-boid_x_velocities=[random.uniform(0,10.0) for x in range(50)]
-boid_y_velocities=[random.uniform(-20.0,20.0) for x in range(50)]
-boids=(boids_x,boids_y,boid_x_velocities,boid_y_velocities)
 
-def update_boids(boids):
-    xs,ys,xvs,yvs=boids
+
+def update_boids(xs,ys,xvs,yvs):
+    max_iteration = len(xs)
     # Fly towards the middle
-    for i in range(len(xs)):
-        for j in range(len(xs)):
-            xvs[i]=xvs[i]+(xs[j]-xs[i])*0.01/len(xs)
-    for i in range(len(xs)):
-        for j in range(len(xs)):
-            yvs[i]=yvs[i]+(ys[j]-ys[i])*0.01/len(xs)
+    fly_middle(xs,ys,xvs,yvs,max_iteration)
     # Fly away from nearby boids
-    for i in range(len(xs)):
-        for j in range(len(xs)):
+    fly_away(xs,ys,xvs,yvs,max_iteration)
+    # Try to match speed with nearby boids
+    match_speed(xs,ys,xvs,yvs,max_iteration)
+    # Move according to velocities
+    move(xs,ys,xvs,yvs,max_iteration)
+
+
+def fly_middle(xs,ys,xvs,yvs,max_iteration):
+    for i in range(max_iteration):
+        for j in range(max_iteration):
+            xvs[i]=xvs[i]+(xs[j]-xs[i])*0.01/len(xs)
+    for i in range(max_iteration):
+        for j in range(max_iteration):
+            yvs[i]=yvs[i]+(ys[j]-ys[i])*0.01/len(xs)
+
+def fly_away(xs,ys,xvs,yvs,max_iteration):
+    for i in range(max_iteration):
+        for j in range(max_iteration):
             if (xs[j]-xs[i])**2 + (ys[j]-ys[i])**2 < 100:
                 xvs[i]=xvs[i]+(xs[i]-xs[j])
                 yvs[i]=yvs[i]+(ys[i]-ys[j])
-    # Try to match speed with nearby boids
-    for i in range(len(xs)):
-        for j in range(len(xs)):
+def match_speed(xs,ys,xvs,yvs,max_iteration):
+    for i in range(max_iteration):
+        for j in range(max_iteration):
             if (xs[j]-xs[i])**2 + (ys[j]-ys[i])**2 < 10000:
                 xvs[i]=xvs[i]+(xvs[j]-xvs[i])*0.125/len(xs)
                 yvs[i]=yvs[i]+(yvs[j]-yvs[i])*0.125/len(xs)
-    # Move according to velocities
-    for i in range(len(xs)):
+def move(xs,ys,xvs,yvs,max_iteration):
+    for i in range(max_iteration):
         xs[i]=xs[i]+xvs[i]
         ys[i]=ys[i]+yvs[i]
+
+
+
+def create_number_range(lower_bound,upper_bound,max_number):
+    return [random.uniform(lower_bound,upper_bound) for x in range(max_number)]
+
+if __name__ == "__main__":
+    number_range = 50
+    boids_x = create_number_range(-450,50.0,number_range)
+    boids_y = create_number_range(300.0,600.0,number_range)
+    boid_x_velocities = create_number_range(0,10.0,number_range)
+    boid_y_velocities = create_number_range(-20.0,20.0,number_range)
+    boids= update_boids(boids_x,boids_y,boid_x_velocities,boid_y_velocities)
